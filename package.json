@@ -1,0 +1,11 @@
+{
+  "name": "json-parser",
+  "description": "A simple json parser bassed in flags without dependencies",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": {
+    "name": "Gabriel Guerra",
+    "email": "gfranklings@gmail.com"
+  }
+}

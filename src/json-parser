@@ -1,0 +1,81 @@
+#!/usr/bin/env node
+const parse = (options) => {
+  eval(`console.log(${options.json}${options.exp})`)
+}
+
+const getArguments = () => {
+  return process.argv.slice(2)
+}
+
+const error = (message) => {
+  console.error(message)
+  process.exit(1)
+}
+
+const showUsage = () => {
+  error([
+    'usage: $ json-parser json expression',
+    'usage: $ json-parser expression json',
+    'usage: $ echo json | json-parser --stdin expression',
+    'usage: $ echo json | json-parser expression --stdin',
+  ].join('\n'))
+}
+
+const getStdin = () => new Promise((resolve) => {
+  process.stdin.setEncoding('utf-8')
+  process.stdin.on('data', message => {
+    resolve(message)
+  })
+})
+
+const processArguments = async (argv) => {
+  const options = {
+    stdin: false,
+    exp: undefined,
+    json: undefined,
+  }
+  for (const arg of argv) {
+    if (arg[0] === '-') {
+      if (arg === '--stdin' || arg === '-') {
+        options.stdin = true
+      }
+    } else {
+      // trying to parse the json, if unparseable possibly is
+      // the expression
+      try {
+        JSON.parse(arg)
+        options.json = arg
+      } catch (err) {
+        if (options.exp === undefined) {
+          options.exp = arg
+        } else {
+          error(err)
+        }
+      }
+    }
+  }
+  if (options.exp === undefined) {
+    options.exp = ''
+  }
+  if (options.json === undefined && options.stdin === true) {
+    const stdin = await getStdin()
+    try {
+      JSON.parse(stdin)
+      options.json = stdin
+    } catch (err) {
+      error(err)
+    }
+  } else if (options.json === undefined) {
+    showUsage()
+  }
+
+  return options
+}
+
+const main = async () => {
+  parse((await processArguments(getArguments())))
+}
+
+if (require.main === module) {
+  main()
+}
