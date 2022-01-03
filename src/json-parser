@@ -7,7 +7,7 @@ const getArguments = () => {
   return process.argv.slice(2)
 }
 
-const error = (message) => {
+const error = message => {
   console.error(message)
   process.exit(1)
 }
